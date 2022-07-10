@@ -1,5 +1,6 @@
 const db = require('../db');
 const bcrypt = require('bcryptjs');
+const jwtGenerator = require('../utils/jwtGenerator');
 
 class UserController {
     // @desc    GET all users
@@ -74,9 +75,11 @@ class UserController {
                 );
             }
 
+            const token = jwtGenerator(results.rows[0].id);
             res.status(201).json({
                 status: 'success',
                 data: results.rows[0],
+                token: token,
             });
         } catch (e) {
             res.status(400);
@@ -102,9 +105,11 @@ class UserController {
 
         const user = result.rows[0];
         if (user && (await bcrypt.compare(password, user.password))) {
+            const token = jwtGenerator(user.id);
             res.status(201).json({
                 status: 'success',
                 data: user,
+                token: token,
             });
         } else {
             res.status(400);
