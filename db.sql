@@ -7,7 +7,7 @@ CREATE TABLE users (
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
     email VARCHAR(50) NOT NULL UNIQUE,
-    password VARCHAR(50) NOT NULL,
+    password VARCHAR(60) NOT NULL,
     telephone_number VARCHAR(12) NOT NULL,
     location VARCHAR(50),
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
