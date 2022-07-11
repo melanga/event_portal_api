@@ -116,5 +116,60 @@ class UserController {
             throw new Error('Invalid password');
         }
     }
+
+    // @desc    Get user data
+    // @route   GET /api/v1/users/me
+    // @access  Private
+    static async getMe(req, res) {
+        res.status(200).json(req.user);
+    }
+
+    // @desc    UPDATE user
+    // @route   PUT /api/v1/user/
+    // @access  Private
+    static async updateUser(req, res) {
+        const {
+            first_name,
+            last_name,
+            email,
+            telephone_number,
+            location,
+            is_customer,
+            description,
+        } = req.body;
+
+        try {
+            // update user details
+            const results = await db.query(
+                'UPDATE users SET first_name = $1, last_name = $2, email=$3, telephone_number=$4, updated_at=now(), location=$5 WHERE id=$6 RETURNING *',
+                [
+                    first_name,
+                    last_name,
+                    email,
+                    telephone_number,
+                    location,
+                    req.user.id,
+                ]
+            );
+
+            if (!is_customer) {
+                // update service provider description
+                const insert_service_provider = await db.query(
+                    'UPDATE service_provider SET description = $1 WHERE user_id=$2 RETURNING *',
+                    [description, req.user.id]
+                );
+            }
+
+            const token = jwtGenerator(results.rows[0].id);
+            res.status(201).json({
+                status: 'success',
+                data: results.rows[0],
+                token: token,
+            });
+        } catch (e) {
+            res.status(400);
+            throw new Error(e);
+        }
+    }
 }
 module.exports = UserController;
