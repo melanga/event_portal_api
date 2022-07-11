@@ -160,11 +160,9 @@ class UserController {
                 );
             }
 
-            const token = jwtGenerator(results.rows[0].id);
             res.status(201).json({
                 status: 'success',
                 data: results.rows[0],
-                token: token,
             });
         } catch (e) {
             res.status(400);
