@@ -27,8 +27,7 @@ CREATE TABLE service_provider(
 );
 
 CREATE TABLE category (
-    id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-    name VARCHAR(50) NOT NULL,
+    name VARCHAR(50) PRIMARY KEY ,
     icon_url VARCHAR(255) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
@@ -40,9 +39,9 @@ CREATE TABLE event (
     description VARCHAR(255),
     location VARCHAR(50),
     date TIMESTAMP NOT NULL,
-    category_id uuid NOT NULL,
+    category VARCHAR(50) NOT NULL,
     customer_id uuid NOT NULL,
-    CONSTRAINT event_category_id_fk FOREIGN KEY (category_id) REFERENCES category(id) ON DELETE CASCADE,
+    CONSTRAINT event_category_fk FOREIGN KEY (category) REFERENCES category(name) ON DELETE SET NULL,
     CONSTRAINT event_customer_id_fk FOREIGN KEY (customer_id) REFERENCES customer(user_id) ON DELETE CASCADE,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
@@ -59,10 +58,10 @@ CREATE TABLE service_provider_event (
 CREATE TABLE requirement (
     id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
     event_id uuid NOT NULL,
-    category_id uuid NOT NULL,
+    category VARCHAR(50) NOT NULL,
     description VARCHAR(255),
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
     CONSTRAINT requirement_event_id_fk FOREIGN KEY (event_id) REFERENCES event(id) ON DELETE CASCADE,
-    CONSTRAINT requirement_category_id_fk FOREIGN KEY (category_id) REFERENCES category(id) ON DELETE SET NULL
+    CONSTRAINT requirement_category_fk FOREIGN KEY (category) REFERENCES category(name) ON DELETE SET NULL
 );
