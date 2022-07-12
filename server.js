@@ -11,6 +11,8 @@ const port = process.env.PORT || 3001;
 app.use(express.json());
 // initialize routes
 app.use('/api/v1/users', require('./routes/usersRoutes'));
+app.use('/api/v1/events', require('./routes/eventRoutes'));
+
 // override default error handler
 app.use(errorHandler);
 
