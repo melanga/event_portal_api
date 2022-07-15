@@ -7,11 +7,12 @@ const { errorHandler } = require('./middleware/errorMiddleware');
 const app = express();
 // define the port
 const port = process.env.PORT || 3001;
-
+// json parser
 app.use(express.json());
 // initialize routes
 app.use('/api/v1/users', require('./routes/usersRoutes'));
 app.use('/api/v1/events', require('./routes/eventRoutes'));
+app.use('/api/v1/requirements', require('./routes/requirementRoutes'));
 
 // override default error handler
 app.use(errorHandler);
