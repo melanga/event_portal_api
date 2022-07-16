@@ -33,6 +33,7 @@ class UserController {
             telephone_number,
             location,
             is_customer,
+            service_title,
             description,
         } = req.body;
 
@@ -70,8 +71,8 @@ class UserController {
                 );
             } else {
                 const insert_service_provider = await db.query(
-                    'INSERT INTO service_provider (user_id, description) VALUES ($1, $2) RETURNING *',
-                    [results.rows[0].id, description]
+                    'INSERT INTO service_provider (user_id,service_title, description) VALUES ($1, $2, $3) RETURNING *',
+                    [results.rows[0].id, service_title, description]
                 );
             }
 
@@ -135,6 +136,7 @@ class UserController {
             telephone_number,
             location,
             is_customer,
+            service_title,
             description,
         } = req.body;
 
@@ -153,10 +155,10 @@ class UserController {
             );
 
             if (!is_customer) {
-                // update service provider description
+                // update service provider description & service title
                 const insert_service_provider = await db.query(
-                    'UPDATE service_provider SET description = $1 WHERE user_id=$2 RETURNING *',
-                    [description, req.user.id]
+                    'UPDATE service_provider SET description = $1,service_title=$2 WHERE user_id=$3 RETURNING *',
+                    [description, service_title, req.user.id]
                 );
             }
 
