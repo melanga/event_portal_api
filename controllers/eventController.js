@@ -114,6 +114,66 @@ class EventController {
             throw new Error(e);
         }
     }
+
+    // @desc    GET event's all service_providers
+    // @route   GET /api/v1/events/:id/service_providers
+    // @access  Protected
+    static async getEventServiceProviders(req, res) {
+        try {
+            const results = await db.query(
+                'SELECT * from service_provider_event WHERE event_id = $1',
+                [req.params.id]
+            );
+            const service_providers = results.rows;
+            res.status(200).json({
+                status: 'success',
+                data: service_providers,
+            });
+        } catch (e) {
+            res.status(400);
+            throw new Error(e);
+        }
+    }
+
+    // @desc    Add service_provider to an event
+    // @route   PUT /api/v1/events/:event_id/service_providers/:service_provider_id
+    // @access  Protected
+    static async putEventServiceProvider(req, res) {
+        try {
+            const results = await db.query(
+                'INSERT INTO service_provider_event (event_id, service_provider_id) VALUES ($1,$2) RETURNING *',
+                [req.params.event_id, req.params.service_provider_id]
+            );
+            const added_service_provider = results.rows[0];
+            res.status(200).json({
+                status: 'success',
+                data: added_service_provider,
+            });
+        } catch (e) {
+            res.status(400);
+            throw new Error(e);
+        }
+    }
+
+    // @desc    Delete service_provider from an event
+    // @route   DELETE /api/v1/events/:event_id/service_providers/:service_provider_id
+    // @access  Protected
+    static async deleteEventServiceProvider(req, res) {
+        try {
+            const results = await db.query(
+                'DELETE FROM service_provider_event WHERE event_id = $1 AND service_provider_id = $2 RETURNING *',
+                [req.params.event_id, req.params.service_provider_id]
+            );
+            const deleted_service_provider = results.rows[0];
+            res.status(200).json({
+                status: 'success',
+                data: deleted_service_provider,
+            });
+        } catch (e) {
+            res.status(400);
+            throw new Error(e);
+        }
+    }
 }
 
 module.exports = EventController;
