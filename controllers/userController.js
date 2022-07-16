@@ -122,28 +122,7 @@ class UserController {
     // @route   GET /api/v1/users/me
     // @access  Private
     static async getMe(req, res) {
-        // if user is a service provider get service provider data
-        try {
-            const results = await db.query(
-                'SELECT * FROM service_provider WHERE user_id = $1',
-                [req.user.id]
-            );
-            const service_provider_data = results.rows[0];
-            if (service_provider_data) {
-                res.status(200).json({
-                    status: 'success',
-                    service_provider_data: service_provider_data,
-                    user_data: req.user,
-                });
-            } else {
-                res.status(200).json({
-                    status: 'success',
-                    user_data: req.user,
-                });
-            }
-        } catch (e) {
-            console.log(e);
-        }
+        res.status(200).json(req.user);
     }
 
     // @desc    UPDATE user

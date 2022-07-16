@@ -17,17 +17,8 @@ const protect = async (req, res, next) => {
             const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
 
             // Get user from the token
-            const result = await db.query('SELECT * FROM users WHERE id = $1', [
-                decoded.user_id,
-            ]);
+            req.user = await getUser(decoded.user_id);
 
-            req.user = _.pick(result.rows[0], [
-                'id',
-                'first_name',
-                'last_name',
-                'email',
-                'location',
-            ]);
             next();
         } catch (error) {
             console.log(error);
@@ -42,4 +33,37 @@ const protect = async (req, res, next) => {
     }
 };
 
+const getUser = async (user_id) => {
+    const is_service_provider = await db.query(
+        'SELECT * FROM service_provider WHERE user_id = $1',
+        [user_id]
+    );
+    if (is_service_provider.rows[0]) {
+        // join service_provider and users
+        const result = await db.query(
+            'SELECT * FROM service_provider JOIN users ON users.id = service_provider.user_id WHERE users.id = $1',
+            [user_id]
+        );
+        return _.pick(result.rows[0], [
+            'id',
+            'service_title',
+            'description',
+            'first_name',
+            'last_name',
+            'email',
+            'location',
+        ]);
+    } else {
+        const result = await db.query('SELECT * FROM users WHERE id = $1', [
+            user_id,
+        ]);
+        return _.pick(result.rows[0], [
+            'id',
+            'first_name',
+            'last_name',
+            'email',
+            'location',
+        ]);
+    }
+};
 module.exports = protect;
