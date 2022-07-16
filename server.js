@@ -13,6 +13,7 @@ app.use(express.json());
 app.use('/api/v1/users', require('./routes/usersRoutes'));
 app.use('/api/v1/events', require('./routes/eventRoutes'));
 app.use('/api/v1/requirements', require('./routes/requirementRoutes'));
+app.use('/api/v1/service_providers', require('./routes/serviceProviderRoutes'));
 
 // override default error handler
 app.use(errorHandler);
