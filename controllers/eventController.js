@@ -1,12 +1,17 @@
 const db = require('../db');
 
 class EventController {
-    // @desc    GET all events
+    // @desc    GET a user's all events
     // @route   GET /api/v1/events/
     // @access  Protected
     static async getEvents(req, res) {
+        const { customer_id } = req.body;
+
         try {
-            const results = await db.query('SELECT * FROM event');
+            const results = await db.query(
+                'SELECT * FROM event WHERE customer_id = $1',
+                [customer_id]
+            );
             const events = results.rows;
             res.status(200).json({
                 status: 'success',
