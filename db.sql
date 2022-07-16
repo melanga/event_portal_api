@@ -22,6 +22,7 @@ CREATE TABLE customer (
 
 CREATE TABLE service_provider(
     user_id uuid PRIMARY KEY,
+    service_title VARCHAR(50) NOT NULL DEFAULT 'no title',
     description VARCHAR(255),
     CONSTRAINT service_provider_user_id_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );

@@ -33,6 +33,7 @@ class UserController {
             telephone_number,
             location,
             is_customer,
+            service_title,
             description,
         } = req.body;
 
@@ -70,8 +71,8 @@ class UserController {
                 );
             } else {
                 const insert_service_provider = await db.query(
-                    'INSERT INTO service_provider (user_id, description) VALUES ($1, $2) RETURNING *',
-                    [results.rows[0].id, description]
+                    'INSERT INTO service_provider (user_id,service_title, description) VALUES ($1, $2, $3) RETURNING *',
+                    [results.rows[0].id, service_title, description]
                 );
             }
 
@@ -121,7 +122,28 @@ class UserController {
     // @route   GET /api/v1/users/me
     // @access  Private
     static async getMe(req, res) {
-        res.status(200).json(req.user);
+        // if user is a service provider get service provider data
+        try {
+            const results = await db.query(
+                'SELECT * FROM service_provider WHERE user_id = $1',
+                [req.user.id]
+            );
+            const service_provider_data = results.rows[0];
+            if (service_provider_data) {
+                res.status(200).json({
+                    status: 'success',
+                    service_provider_data: service_provider_data,
+                    user_data: req.user,
+                });
+            } else {
+                res.status(200).json({
+                    status: 'success',
+                    user_data: req.user,
+                });
+            }
+        } catch (e) {
+            console.log(e);
+        }
     }
 
     // @desc    UPDATE user
@@ -135,6 +157,7 @@ class UserController {
             telephone_number,
             location,
             is_customer,
+            service_title,
             description,
         } = req.body;
 
@@ -153,10 +176,10 @@ class UserController {
             );
 
             if (!is_customer) {
-                // update service provider description
+                // update service provider description & service title
                 const insert_service_provider = await db.query(
-                    'UPDATE service_provider SET description = $1 WHERE user_id=$2 RETURNING *',
-                    [description, req.user.id]
+                    'UPDATE service_provider SET description = $1,service_title=$2 WHERE user_id=$3 RETURNING *',
+                    [description, service_title, req.user.id]
                 );
             }
 
