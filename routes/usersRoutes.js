@@ -16,4 +16,10 @@ router.route('/').get(protect, userController.getUsers);
 router.route('/update').put(protect, userController.updateUser);
 // delete user
 router.route('/delete').delete(protect_admin, userController.deleteUser);
+// get all customers
+router.route('/customers').get(protect, userController.getCustomers);
+// get all service providers
+router
+    .route('/service_providers')
+    .get(protect, userController.getServiceProviders);
 module.exports = router;

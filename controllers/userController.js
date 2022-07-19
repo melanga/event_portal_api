@@ -21,6 +21,48 @@ class UserController {
         }
     }
 
+    // @desc    GET all customers
+    // @route   GET /api/v1/users/customers/
+    // @access  Protected
+    static async getCustomers(req, res) {
+        try {
+            // get all customers
+            const results = await db.query(
+                'SELECT * FROM customer JOIN users ON customer.user_id = users.id'
+            );
+            const customers = results.rows;
+            res.status(200).json({
+                status: 'success',
+                results: customers.length,
+                data: customers,
+            });
+        } catch (e) {
+            res.status(400);
+            throw new Error(e);
+        }
+    }
+
+    // @desc    GET all service providers
+    // @route   GET /api/v1/users/service_providers/
+    // @access  Protected
+    static async getServiceProviders(req, res) {
+        try {
+            // get all customers
+            const results = await db.query(
+                'SELECT * FROM service_provider JOIN users ON service_provider.user_id = users.id'
+            );
+            const service_providers = results.rows;
+            res.status(200).json({
+                status: 'success',
+                results: service_providers.length,
+                data: service_providers,
+            });
+        } catch (e) {
+            res.status(400);
+            throw new Error(e);
+        }
+    }
+
     // @desc    CREATE user
     // @route   POST /api/v1/user/
     // @access  Public
@@ -65,12 +107,12 @@ class UserController {
             );
 
             if (is_customer) {
-                const insert_customer = await db.query(
+                await db.query(
                     'INSERT INTO customer (user_id) VALUES ($1) RETURNING *',
                     [results.rows[0].id]
                 );
             } else {
-                const insert_service_provider = await db.query(
+                await db.query(
                     'INSERT INTO service_provider (user_id,service_title, description) VALUES ($1, $2, $3) RETURNING *',
                     [results.rows[0].id, service_title, description]
                 );
@@ -156,7 +198,7 @@ class UserController {
 
             if (!is_customer) {
                 // update service provider description & service title
-                const insert_service_provider = await db.query(
+                await db.query(
                     'UPDATE service_provider SET description = $1,service_title=$2 WHERE user_id=$3 RETURNING *',
                     [description, service_title, req.user.id]
                 );
