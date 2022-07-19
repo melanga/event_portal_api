@@ -171,5 +171,25 @@ class UserController {
             throw new Error(e);
         }
     }
+
+    // @desc    DELETE user
+    // @route   DELETE /api/v1/user/:id
+    // @access  Private
+    static async deleteUser(req, res) {
+        try {
+            // delete user
+            const results = await db.query(
+                'DELETE FROM users WHERE id = $1 RETURNING *',
+                [req.params.id]
+            );
+            res.status(201).json({
+                status: 'success',
+                data: results.rows[0],
+            });
+        } catch (e) {
+            res.status(400);
+            throw new Error(e);
+        }
+    }
 }
 module.exports = UserController;
