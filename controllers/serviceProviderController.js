@@ -5,8 +5,9 @@ const db = require('../db');
 // @access  Protected
 const getServiceProviderEvents = async (req, res) => {
     try {
+        // join service_provider_event table with event table
         const result = await db.query(
-            'SELECT * FROM service_provider_event WHERE service_provider_id = $1',
+            'SELECT * FROM event INNER JOIN service_provider_event ON event.id = service_provider_event.event_id WHERE service_provider_event.service_provider_id = $1',
             [req.params.id]
         );
         const events = result.rows;

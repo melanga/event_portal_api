@@ -121,7 +121,7 @@ class EventController {
     static async getEventServiceProviders(req, res) {
         try {
             const results = await db.query(
-                'SELECT * from service_provider_event WHERE event_id = $1',
+                'SELECT * from users INNER JOIN service_provider_event ON users.id = service_provider_event.service_provider_id WHERE event_id = $1',
                 [req.params.id]
             );
             const service_providers = results.rows;
