@@ -1,4 +1,5 @@
 const db = require('../db');
+const _ = require('lodash');
 
 class EventController {
     // @desc    GET a user's all events
@@ -124,7 +125,9 @@ class EventController {
                 'SELECT * from users INNER JOIN service_provider_event ON users.id = service_provider_event.service_provider_id WHERE event_id = $1',
                 [req.params.id]
             );
-            const service_providers = results.rows;
+            const service_providers = results.rows.map((sp) =>
+                _.omit(sp, ['password', 'id', 'created_at', 'updated_at'])
+            );
             res.status(200).json({
                 status: 'success',
                 data: service_providers,
@@ -139,10 +142,11 @@ class EventController {
     // @route   PUT /api/v1/events/:event_id/service_providers/:service_provider_id
     // @access  Protected
     static async putEventServiceProvider(req, res) {
+        const { event_id, service_provider_id } = req.body;
         try {
             const results = await db.query(
                 'INSERT INTO service_provider_event (event_id, service_provider_id) VALUES ($1,$2) RETURNING *',
-                [req.params.event_id, req.params.service_provider_id]
+                [event_id, service_provider_id]
             );
             const added_service_provider = results.rows[0];
             res.status(200).json({
@@ -159,15 +163,60 @@ class EventController {
     // @route   DELETE /api/v1/events/:event_id/service_providers/:service_provider_id
     // @access  Protected
     static async deleteEventServiceProvider(req, res) {
+        const { event_id, service_provider_id } = req.params;
         try {
             const results = await db.query(
                 'DELETE FROM service_provider_event WHERE event_id = $1 AND service_provider_id = $2 RETURNING *',
-                [req.params.event_id, req.params.service_provider_id]
+                [event_id, service_provider_id]
             );
             const deleted_service_provider = results.rows[0];
             res.status(200).json({
                 status: 'success',
                 data: deleted_service_provider,
+            });
+        } catch (e) {
+            res.status(400);
+            throw new Error(e);
+        }
+    }
+
+    // @desc    UPDATE c_confirmed of an event
+    // @route   PUT /api/v1/events/:event_id/service_providers/:service_provider_id/c_confirmed
+    // @access  Protected
+    static async updateEventServiceProviderCConfirmed(req, res) {
+        const { c_confirmed } = req.body;
+        const { event_id, service_provider_id } = req.params;
+        try {
+            const results = await db.query(
+                'UPDATE service_provider_event SET c_confirmed=$1, c_confirmed_at=now() WHERE event_id=$2 AND service_provider_id=$3 RETURNING *',
+                [c_confirmed, event_id, service_provider_id]
+            );
+            const updated_service_provider = results.rows[0];
+            res.status(200).json({
+                status: 'success',
+                data: updated_service_provider,
+            });
+        } catch (e) {
+            res.status(400);
+            throw new Error(e);
+        }
+    }
+
+    // @desc    UPDATE sp_confirmed of an event
+    // @route   PUT /api/v1/events/:event_id/service_providers/:service_provider_id/sp_confirmed
+    // @access  Protected
+    static async updateEventServiceProviderSPConfirmed(req, res) {
+        const { sp_confirmed } = req.body;
+        const { event_id, service_provider_id } = req.params;
+        try {
+            const results = await db.query(
+                'UPDATE service_provider_event SET sp_confirmed=$1, sp_confirmed_at=now() WHERE event_id=$2 AND service_provider_id=$3 RETURNING *',
+                [sp_confirmed, event_id, service_provider_id]
+            );
+            const updated_service_provider = results.rows[0];
+            res.status(200).json({
+                status: 'success',
+                data: updated_service_provider,
             });
         } catch (e) {
             res.status(400);
