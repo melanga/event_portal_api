@@ -27,6 +27,12 @@ CREATE TABLE service_provider(
     CONSTRAINT service_provider_user_id_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+CREATE TABLE admin
+(
+    user_id uuid PRIMARY KEY,
+    CONSTRAINT admin_user_id_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 CREATE TABLE category (
     name VARCHAR(50) PRIMARY KEY ,
     icon_url VARCHAR(255) NOT NULL,
@@ -51,6 +57,10 @@ CREATE TABLE event (
 CREATE TABLE service_provider_event (
     service_provider_id uuid NOT NULL,
     event_id uuid NOT NULL,
+    sp_confirmed BOOLEAN NOT NULL DEFAULT FALSE,
+    sp_confirmed_at TIMESTAMP,
+    c_confirmed BOOLEAN NOT NULL DEFAULT FALSE,
+    c_confirmed_at TIMESTAMP,
     PRIMARY KEY (service_provider_id, event_id),
     CONSTRAINT service_provider_event_service_provider_id_fk FOREIGN KEY (service_provider_id) REFERENCES service_provider(id) ON DELETE SET NULL,
     CONSTRAINT service_provider_event_event_id_fk FOREIGN KEY (event_id) REFERENCES event(id) ON DELETE CASCADE
