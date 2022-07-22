@@ -1,5 +1,8 @@
 const express = require('express');
-const { protect } = require('../middleware/authMiddleware');
+const {
+    protect,
+    protect_service_provider,
+} = require('../middleware/authMiddleware');
 const EventController = require('../controllers/eventController');
 
 const router = express.Router();
@@ -35,6 +38,9 @@ router
 // update service_provider_event sp_confirmed
 router
     .route('/:event_id/service_providers/:service_provider_id/sp_confirmed')
-    .put(protect, EventController.updateEventServiceProviderSPConfirmed);
+    .put(
+        protect_service_provider,
+        EventController.updateEventServiceProviderSPConfirmed
+    );
 
 module.exports = router;
