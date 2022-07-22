@@ -9,6 +9,22 @@ const protect = async (req, res, next) => {
     req.user = await getUser(user_id);
     next();
 };
+const protect_customer = async (req, res, next) => {
+    // check req for token and if token is valid, get user
+    const user_id = getUserIdFromToken(req);
+    // check if user is a customer
+    const is_customer = await db.query(
+        'SELECT * FROM customer WHERE user_id = $1',
+        [user_id]
+    );
+    if (is_customer.rows[0]) {
+        req.user = await getUser(user_id);
+        next();
+    } else {
+        res.status(401);
+        throw new Error('Not authorized, not a customer');
+    }
+};
 // service provider auth middleware
 const protect_service_provider = async (req, res, next) => {
     const user_id = getUserIdFromToken(req);
@@ -97,4 +113,9 @@ const getUser = async (user_id) => {
     }
 };
 
-module.exports = { protect, protect_admin, protect_service_provider };
+module.exports = {
+    protect,
+    protect_admin,
+    protect_service_provider,
+    protect_customer,
+};
