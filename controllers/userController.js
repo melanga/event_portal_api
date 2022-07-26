@@ -1,6 +1,7 @@
 const db = require('../db');
 const bcrypt = require('bcryptjs');
 const jwtGenerator = require('../utils/jwtGenerator');
+const _ = require('lodash');
 
 class UserController {
     // @desc    GET all users
@@ -151,7 +152,7 @@ class UserController {
             const token = jwtGenerator(user.id);
             res.status(201).json({
                 status: 'success',
-                data: user,
+                data: _.omit(user, ['password', 'created_at', 'updated_at']),
                 token: token,
             });
         } else {

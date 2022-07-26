@@ -1,10 +1,12 @@
 const express = require('express');
 require('express-async-errors');
 require('dotenv').config();
+const cors = require('cors');
 
 const { errorHandler } = require('./middleware/errorMiddleware');
 // initialize express app
 const app = express();
+app.use(cors());
 // define the port
 const port = process.env.PORT || 3001;
 // json parser

@@ -89,7 +89,7 @@ const getUser = async (user_id) => {
         'SELECT * FROM service_provider JOIN users ON users.id = service_provider.user_id WHERE users.id = $1',
         [user_id]
     );
-    if (!result.rows[0]) {
+    if (result.rows[0] === {}) {
         return _.pick(result.rows[0], [
             'id',
             'service_title',

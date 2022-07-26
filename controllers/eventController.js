@@ -58,19 +58,24 @@ class EventController {
     static async createEvent(req, res) {
         const { name, description, location, date, category, customer_id } =
             req.body;
-        try {
-            const results = await db.query(
-                'INSERT INTO event (name, description, location, date, category, customer_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-                [name, description, location, date, category, customer_id]
-            );
-            const created_event = results.rows[0];
-            res.status(200).json({
-                status: 'success',
-                data: created_event,
-            });
-        } catch (e) {
+        if (req.user.id === customer_id) {
+            try {
+                const results = await db.query(
+                    'INSERT INTO event (name, description, location, date, category, customer_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+                    [name, description, location, date, category, customer_id]
+                );
+                const created_event = results.rows[0];
+                res.status(200).json({
+                    status: 'success',
+                    data: created_event,
+                });
+            } catch (e) {
+                res.status(400);
+                throw new Error(e);
+            }
+        } else {
             res.status(400);
-            throw new Error(e);
+            throw new Error('invalid user id from the token');
         }
     }
 
