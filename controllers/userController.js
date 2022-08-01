@@ -2,6 +2,7 @@ const db = require('../db');
 const bcrypt = require('bcryptjs');
 const jwtGenerator = require('../utils/jwtGenerator');
 const _ = require('lodash');
+const User = require('../models/userModel');
 
 class UserController {
     // @desc    GET all users
@@ -68,66 +69,76 @@ class UserController {
     // @route   POST /api/v1/user/
     // @access  Public
     static async createUser(req, res) {
-        const {
-            first_name,
-            last_name,
-            email,
-            password,
-            telephone_number,
-            location,
-            is_customer,
-            service_title,
-            description,
-        } = req.body;
-
-        // check if user exists
-        const userExists = await db.query(
-            'SELECT * FROM users WHERE email = $1',
-            [email]
+        const { error } = User.validate(
+            _.omit(req.body, ['service_title', 'description', 'is_customer']),
+            {
+                abortEarly: false,
+            }
         );
-
-        if (userExists.rows[0]) {
-            res.status(400);
-            throw new Error('user already exists');
-        }
-
-        try {
-            // Hashing the password
-            const salt = await bcrypt.genSalt(10);
-            const hashedPassword = await bcrypt.hash(password, salt);
-            const results = await db.query(
-                'INSERT INTO users (first_name, last_name, email, password, telephone_number, location) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-                [
-                    first_name,
-                    last_name,
-                    email,
-                    hashedPassword,
-                    telephone_number,
-                    location,
-                ]
+        if (!error) {
+            const {
+                first_name,
+                last_name,
+                email,
+                password,
+                telephone_number,
+                location,
+                is_customer,
+                service_title,
+                description,
+            } = req.body;
+            // check if user exists
+            const userExists = await db.query(
+                'SELECT * FROM users WHERE email = $1',
+                [email]
             );
 
-            if (is_customer) {
-                await db.query(
-                    'INSERT INTO customer (user_id) VALUES ($1) RETURNING *',
-                    [results.rows[0].id]
-                );
-            } else {
-                await db.query(
-                    'INSERT INTO service_provider (user_id,service_title, description) VALUES ($1, $2, $3) RETURNING *',
-                    [results.rows[0].id, service_title, description]
-                );
+            if (userExists.rows[0]) {
+                res.status(400);
+                throw new Error('user already exists');
             }
 
-            const token = jwtGenerator(results.rows[0].id);
-            res.status(201).json({
-                status: 'success',
-                data: results.rows[0],
-                token: token,
-            });
-        } catch (e) {
+            try {
+                // Hashing the password
+                const salt = await bcrypt.genSalt(10);
+                const hashedPassword = await bcrypt.hash(password, salt);
+                const results = await db.query(
+                    'INSERT INTO users (first_name, last_name, email, password, telephone_number, location) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+                    [
+                        first_name,
+                        last_name,
+                        email,
+                        hashedPassword,
+                        telephone_number,
+                        location,
+                    ]
+                );
+
+                if (is_customer) {
+                    await db.query(
+                        'INSERT INTO customer (user_id) VALUES ($1) RETURNING *',
+                        [results.rows[0].id]
+                    );
+                } else {
+                    await db.query(
+                        'INSERT INTO service_provider (user_id,service_title, description) VALUES ($1, $2, $3) RETURNING *',
+                        [results.rows[0].id, service_title, description]
+                    );
+                }
+
+                const token = jwtGenerator(results.rows[0].id);
+                res.status(201).json({
+                    status: 'success',
+                    data: results.rows[0],
+                    token: token,
+                });
+            } catch (e) {
+                res.status(400);
+                throw new Error(e);
+            }
+        } else {
             res.status(400);
-            throw new Error(e);
+            throw error;
         }
     }
 
