@@ -22,6 +22,27 @@ const getServiceProviderEvents = async (req, res) => {
     }
 };
 
+// @desc    add rating to service provider
+// @route   POST /api/v1/service_providers/:id/rating
+// @access  Protected
+const add_rating = async (req, res) => {
+    try {
+        const { rating, comment } = req.body;
+        const result = await db.query(
+            'INSERT INTO service_provider_rating (service_provider_id, rating, comment) VALUES ($1, $2, $3) RETURNING *',
+            [req.params.id, rating, comment]
+        );
+        res.status(200).json({
+            status: 'success',
+            data: result.rows[0],
+        });
+    } catch (e) {
+        res.status(400);
+        throw new Error(e);
+    }
+};
+
 module.exports = {
     getServiceProviderEvents,
+    add_rating,
 };
