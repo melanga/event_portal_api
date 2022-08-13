@@ -155,7 +155,7 @@ class UserController {
 
         if (!result.rows[0]) {
             res.status(400);
-            throw new Error('test user');
+            throw new Error('user does not exist');
         }
 
         const user = result.rows[0];
