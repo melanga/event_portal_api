@@ -42,7 +42,30 @@ const add_rating = async (req, res) => {
     }
 };
 
-module.exports = {
+// @desc    GET service providers by search and filters
+// @route   GET /api/v1/service_provider/search
+// @access  Protected
+const getServiceProvidersBySearch = async (req, res) => {
+    try {
+        const { search, filters } = req.query;
+        const { price, rating } = filters;
+        const result = await db.query(
+            `SELECT * FROM service_provider WHERE name ILIKE '%${search}%' AND price >= ${price} AND rating >= ${rating}`
+        );
+        const service_providers = result.rows;
+        res.status(200).json({
+            status: 'success',
+            results: service_providers.length,
+            data: service_providers,
+        });
+    } catch (e) {
+        res.status(400);
+        throw new Error(e);
+    }
+};
+
+module.exports = serviceProviderController = {
     getServiceProviderEvents,
     add_rating,
+    getServiceProvidersBySearch,
 };
