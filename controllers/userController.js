@@ -176,7 +176,7 @@ class UserController {
     // @route   GET /api/v1/users/me
     // @access  Private
     static async getMe(req, res) {
-        res.status(200).json(req.user);
+        res.status(200).json({ status: 'success', data: req.user });
     }
 
     // @desc    UPDATE user
