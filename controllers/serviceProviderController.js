@@ -48,9 +48,9 @@ const add_rating = async (req, res) => {
 const getServiceProvidersBySearch = async (req, res) => {
     try {
         const { search, filters } = req.query;
-        const { price, rating } = filters;
+        // const { price, rating } = filters;
         const result = await db.query(
-            `SELECT * FROM service_provider WHERE name ILIKE '%${search}%' AND price >= ${price} AND rating >= ${rating}`
+            `SELECT * FROM service_provider WHERE service_provider.service_title ILIKE '%${search}%' OR service_provider.description ILIKE '%${search}%'`
         );
         const service_providers = result.rows;
         res.status(200).json({
