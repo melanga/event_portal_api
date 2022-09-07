@@ -17,6 +17,7 @@ app.use('/api/v1/events', require('./routes/eventRoutes'));
 app.use('/api/v1/requirements', require('./routes/requirementRoutes'));
 app.use('/api/v1/service_providers', require('./routes/serviceProviderRoutes'));
 app.use('/api/v1/customers', require('./routes/customerRoutes'));
+app.use('/api/v1/category', require('./routes/categoryRoutes'));
 
 // override default error handler
 app.use(errorHandler);

@@ -1,4 +1,5 @@
 const db = require('../db');
+const _ = require('lodash');
 
 // @desc    GET service_providers events
 // @route   GET /api/v1/service_providers/:id/events
@@ -47,12 +48,88 @@ const add_rating = async (req, res) => {
 // @access  Protected
 const getServiceProvidersBySearch = async (req, res) => {
     try {
-        const { search, filters } = req.query;
+        const { search } = req.query;
         // const { price, rating } = filters;
         const result = await db.query(
-            `SELECT * FROM service_provider WHERE service_provider.service_title ILIKE '%${search}%' OR service_provider.description ILIKE '%${search}%'`
+            `SELECT * FROM service_provider sp JOIN users u on sp.user_id = u.id WHERE sp.service_title ILIKE '%${search}%' OR sp.description ILIKE '%${search}%' OR u.location ILIKE '%${search}%'`
         );
-        const service_providers = result.rows;
+        const service_providers = result.rows.map((sp) =>
+            _.pick(sp, [
+                'service_title',
+                'description',
+                'location',
+                'category',
+                'first_name',
+                'last_name',
+                'telephone_number',
+            ])
+        );
+        res.status(200).json({
+            status: 'success',
+            results: service_providers.length,
+            data: service_providers,
+        });
+    } catch (e) {
+        res.status(400);
+        throw new Error(e);
+    }
+};
+
+// @desc    GET service providers by filters
+// @route   GET /api/v1/service_provider/filter
+// @access  public
+const getServiceProvidersByFilter = async (req, res) => {
+    try {
+        let { filters } = req.query;
+        filters = JSON.parse(filters);
+        const { location, category } = filters;
+        // const { price, rating } = filters;
+        // join service_provider and users and filter
+        const result = await db.query(
+            `SELECT * FROM service_provider sp JOIN users u on sp.user_id = u.id WHERE u.location ILIKE '%${location}%' OR sp.category ILIKE '%${category}%'`
+        );
+
+        const service_providers = result.rows.map((sp) =>
+            _.pick(sp, [
+                'service_title',
+                'description',
+                'location',
+                'category',
+                'first_name',
+                'last_name',
+                'telephone_number',
+            ])
+        );
+        res.status(200).json({
+            status: 'success',
+            results: service_providers.length,
+            data: service_providers,
+        });
+    } catch (e) {
+        res.status(400);
+        throw new Error(e);
+    }
+};
+
+// @desc    GET recent service providers
+// @route   GET /api/v1/service_provider/recent
+// @access  Public
+const getRecentServiceProviders = async (req, res) => {
+    try {
+        const results = await db.query(
+            'SELECT * FROM service_provider JOIN users ON service_provider.user_id = users.id ORDER BY  created_at DESC LIMIT 20'
+        );
+        const service_providers = results.rows.map((sp) =>
+            _.pick(sp, [
+                'service_title',
+                'description',
+                'location',
+                'category',
+                'first_name',
+                'last_name',
+                'telephone_number',
+            ])
+        );
         res.status(200).json({
             status: 'success',
             results: service_providers.length,
@@ -68,4 +145,6 @@ module.exports = serviceProviderController = {
     getServiceProviderEvents,
     add_rating,
     getServiceProvidersBySearch,
+    getRecentServiceProviders,
+    getServiceProvidersByFilter,
 };
