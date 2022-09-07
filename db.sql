@@ -20,23 +20,6 @@ CREATE TABLE customer (
     CONSTRAINT customer_user_id_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
-CREATE TABLE service_provider(
-    user_id uuid PRIMARY KEY,
-    service_title VARCHAR(50) NOT NULL DEFAULT 'no title',
-    description VARCHAR(255),
-    CONSTRAINT service_provider_user_id_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-
-CREATE TABLE service_provider_rating(
-    id SERIAL PRIMARY KEY,
-    service_provider_id uuid NOT NULL,
-    customer_id uuid NOT NULL,
-    rating INTEGER NOT NULL,
-    comment VARCHAR(255),
-    CONSTRAINT service_provider_rating_service_provider_id_fk FOREIGN KEY (service_provider_id) REFERENCES service_provider(user_id) ON DELETE CASCADE,
-    CONSTRAINT service_provider_rating_customer_id_fk FOREIGN KEY (customer_id) REFERENCES users(id) ON DELETE CASCADE
-);
-
 CREATE TABLE admin
 (
     user_id uuid PRIMARY KEY,
@@ -48,6 +31,25 @@ CREATE TABLE category (
     icon_url VARCHAR(255) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE service_provider(
+    user_id uuid PRIMARY KEY,
+    service_title VARCHAR(50) NOT NULL DEFAULT 'no title',
+    description VARCHAR(255) NOT NULL DEFAULT 'no description',
+    category VARCHAR(50),
+    CONSTRAINT service_provider_category FOREIGN KEY (category) REFERENCES category(name) ON DELETE SET NULL,
+    CONSTRAINT service_provider_user_id_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE service_provider_rating(
+    id SERIAL PRIMARY KEY,
+    service_provider_id uuid NOT NULL,
+    customer_id uuid NOT NULL,
+    rating INTEGER NOT NULL,
+    comment VARCHAR(255),
+    CONSTRAINT service_provider_rating_service_provider_id_fk FOREIGN KEY (service_provider_id) REFERENCES service_provider(user_id) ON DELETE CASCADE,
+    CONSTRAINT service_provider_rating_customer_id_fk FOREIGN KEY (customer_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 CREATE TABLE event (
@@ -79,6 +81,7 @@ CREATE TABLE service_provider_event (
 CREATE TABLE requirement (
     id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
     event_id uuid NOT NULL,
+    title VARCHAR(50) NOT NULL DEFAULT 'no title',
     category VARCHAR(50) NOT NULL,
     description VARCHAR(255),
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
