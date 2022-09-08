@@ -86,9 +86,8 @@ const getServiceProvidersByFilter = async (req, res) => {
         // const { price, rating } = filters;
         // join service_provider and users and filter
         const result = await db.query(
-            `SELECT * FROM service_provider sp JOIN users u on sp.user_id = u.id WHERE u.location ILIKE '%${location}%' OR sp.category ILIKE '%${category}%'`
+            `SELECT * FROM service_provider sp JOIN users u on sp.user_id = u.id WHERE u.location LIKE '%${location}%' AND sp.category LIKE '${category}'`
         );
-
         const service_providers = result.rows.map((sp) =>
             _.pick(sp, [
                 'service_title',
