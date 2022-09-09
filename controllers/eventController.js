@@ -126,12 +126,26 @@ class EventController {
     // @access  Protected
     static async getEventServiceProviders(req, res) {
         try {
+            // join users, service_providers, and event_service_providers tables
+            // const results = await db.query(
+            //     'SELECT * FROM users INNER JOIN service_provider ON users.id = service_provider.user_id INNER JOIN service_provider_event ON service_provider.user_id = service_provider_event.service_provider_id WHERE service_provider_event.event_id = $1',
+            //     [req.params.id]
+            // );
+
             const results = await db.query(
-                'SELECT * from users INNER JOIN service_provider_event ON users.id = service_provider_event.service_provider_id WHERE event_id = $1',
+                'SELECT * from users JOIN service_provider ON users.id = service_provider.user_id INNER JOIN service_provider_event ON users.id = service_provider_event.service_provider_id WHERE event_id = $1',
                 [req.params.id]
             );
             const service_providers = results.rows.map((sp) =>
-                _.omit(sp, ['password', 'id', 'created_at', 'updated_at'])
+                _.omit(sp, [
+                    'password',
+                    'id',
+                    'created_at',
+                    'updated_at',
+                    'email',
+                    'event_id',
+                    'user_id',
+                ])
             );
             res.status(200).json({
                 status: 'success',
