@@ -2,17 +2,17 @@ const db = require('../db');
 
 class RequirementController {
     // @desc    GET requirements
-    // @route   GET /api/v1/requirements
+    // @route   GET /api/v1/requirements/:event_id
     // @access  Protected
     static async getRequirements(req, res) {
-        const { event_id } = req.body;
+        const { event_id } = req.params;
 
         try {
             const results = await db.query(
                 'SELECT * FROM requirement WHERE event_id = $1',
                 [event_id]
             );
-            const requirements = results.rows[0];
+            const requirements = results.rows;
             res.status(200).json({
                 status: 'success',
                 results: requirements.length,
@@ -139,7 +139,7 @@ class RequirementController {
 
         try {
             const results = await db.query(
-                'UPDATE requirement_bidding SET price = $1 WHERE id = $2 RETURNING *',
+                'UPDATE requirement_bidding SET price = $1 WHERE requirement_id = $2 RETURNING *',
                 [price, req.params.id]
             );
             const requirement_bidding = results.rows[0];
@@ -159,7 +159,7 @@ class RequirementController {
     static async deleteEventRequirementBidding(req, res) {
         try {
             const results = await db.query(
-                'DELETE FROM requirement_bidding WHERE id = $1 RETURNING *',
+                'DELETE FROM requirement_bidding WHERE requirement_id = $1 RETURNING *',
                 [req.params.id]
             );
             const deleted_requirement_bidding = results.rows[0];

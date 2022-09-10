@@ -74,6 +74,7 @@ class EventController {
                 throw new Error(e);
             }
         } else {
+            console.log(req.user.id, customer_id);
             res.status(400);
             throw new Error('invalid user id from the token');
         }

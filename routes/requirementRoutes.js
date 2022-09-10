@@ -5,7 +5,7 @@ const RequirementController = require('../controllers/requirementController');
 const router = express.Router();
 
 // get requirement
-router.route('/').get(protect, RequirementController.getRequirements);
+router.route('/:event_id').get(protect, RequirementController.getRequirements);
 // create requirement
 router.route('/').post(protect, RequirementController.createRequirement);
 // update requirement
