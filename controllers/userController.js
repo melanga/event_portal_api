@@ -83,6 +83,7 @@ class UserController {
                 password,
                 telephone_number,
                 location,
+                category,
                 is_customer,
                 service_title,
                 description,
@@ -121,8 +122,13 @@ class UserController {
                     );
                 } else {
                     await db.query(
-                        'INSERT INTO service_provider (user_id,service_title, description) VALUES ($1, $2, $3) RETURNING *',
-                        [results.rows[0].id, service_title, description]
+                        'INSERT INTO service_provider (user_id,service_title, description, category) VALUES ($1, $2, $3,$4) RETURNING *',
+                        [
+                            results.rows[0].id,
+                            service_title,
+                            description,
+                            category,
+                        ]
                     );
                 }
 

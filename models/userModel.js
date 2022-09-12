@@ -7,6 +7,7 @@ const User = Joi.object().keys({
     password: Joi.string().required(),
     telephone_number: Joi.string().min(10),
     location: Joi.string(),
+    category: Joi.string(),
 });
 
 // const ServiceProvider = User.keys({

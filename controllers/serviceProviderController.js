@@ -8,10 +8,19 @@ const getServiceProviderEvents = async (req, res) => {
     try {
         // join service_provider_event table with event table
         const result = await db.query(
-            'SELECT * FROM event INNER JOIN service_provider_event ON event.id = service_provider_event.event_id WHERE service_provider_event.service_provider_id = $1',
+            'SELECT * FROM event e INNER JOIN service_provider_event spe ON e.id = spe.event_id JOIN users u ON u.id = e.customer_id WHERE spe.service_provider_id = $1',
             [req.params.id]
         );
-        const events = result.rows;
+        const events = result.rows.map((sp) =>
+            _.omit(sp, [
+                'created_at',
+                'updated_at',
+                'password',
+                'category',
+                'id',
+                'telephone_number',
+            ])
+        );
         res.status(200).json({
             status: 'success',
             results: events.length,
@@ -140,10 +149,41 @@ const getRecentServiceProviders = async (req, res) => {
     }
 };
 
+// @desc    GET service provider bids
+// @route   GET /api/v1/service_provider/:id/bids
+// @access  Private
+const getServiceProviderBids = async (req, res) => {
+    const { location, category } = req.body;
+    try {
+        const results = await db.query(
+            'SELECT r.id, r.title, r.description, r.event_id, e.name, e.customer_id, u.first_name, u.last_name FROM requirement r JOIN event e on r.event_id = e.id JOIN users u on e.customer_id = u.id WHERE e.location = $1 OR u.location=$1 AND e.category = $2',
+            [location, category]
+        );
+        const bids = results.rows.map((sp) =>
+            _.omit(sp, [
+                'created_at',
+                'updated_at',
+                'password',
+                'email',
+                'telephone_number',
+            ])
+        );
+        res.status(200).json({
+            status: 'success',
+            results: bids.length,
+            data: bids,
+        });
+    } catch (e) {
+        res.status(400);
+        throw new Error(e);
+    }
+};
+
 module.exports = serviceProviderController = {
     getServiceProviderEvents,
     add_rating,
     getServiceProvidersBySearch,
     getRecentServiceProviders,
     getServiceProvidersByFilter,
+    getServiceProviderBids,
 };

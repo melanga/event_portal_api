@@ -21,4 +21,6 @@ router.route('/filter').get(spController.getServiceProvidersByFilter);
 
 router.route('/recent').get(spController.getRecentServiceProviders);
 
+router.route('/:id/bids').post(spController.getServiceProviderBids);
+
 module.exports = router;

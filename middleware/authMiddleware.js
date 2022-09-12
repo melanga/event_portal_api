@@ -89,7 +89,7 @@ const getUser = async (user_id) => {
         'SELECT * FROM service_provider JOIN users ON users.id = service_provider.user_id WHERE users.id = $1',
         [user_id]
     );
-    if (result.rows[0] === {}) {
+    if (result.rows[0]) {
         return _.pick(result.rows[0], [
             'id',
             'service_title',
@@ -98,6 +98,8 @@ const getUser = async (user_id) => {
             'last_name',
             'email',
             'location',
+            'category',
+            'telephone_number',
         ]);
     } else {
         const result = await db.query('SELECT * FROM users WHERE id = $1', [

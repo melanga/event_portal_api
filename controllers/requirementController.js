@@ -1,4 +1,5 @@
 const db = require('../db');
+const _ = require('lodash');
 
 class RequirementController {
     // @desc    GET requirements
@@ -90,15 +91,28 @@ class RequirementController {
     }
 
     // @desc    GET event requirements bidding
-    // @route   GET /api/v1/requirements/:id/bidding
+    // @route   GET /api/v1/requirements/:id/bids
     // @access  Protected_Customer
     static async getEventRequirementBidding(req, res) {
         try {
             const results = await db.query(
-                'SELECT * FROM requirement INNER JOIN requirement_bidding ON requirement.id = requirement_bidding.requirement_id WHERE requirement.event_id = $1',
+                'SELECT * FROM requirement_bidding rb JOIN service_provider sp on rb.service_provider_id = sp.user_id WHERE rb.requirement_id = $1',
                 [req.params.id]
             );
-            const requirements = results.rows;
+            const requirements = results.rows.map((rq) =>
+                _.pick(rq, [
+                    'service_title',
+                    'description',
+                    'location',
+                    'category',
+                    'first_name',
+                    'last_name',
+                    'service_provider_id',
+                    'requirement_id',
+                    'telephone_number',
+                    'price',
+                ])
+            );
             res.status(200).json({
                 status: 'success',
                 results: requirements.length,
@@ -111,15 +125,36 @@ class RequirementController {
     }
 
     // @desc    CREATE event requirements bidding
-    // @route   POST /api/v1/requirements/:id/bidding
+    // @route   POST /api/v1/requirements/:req_id/bids/:sp_id
+    // @access  Protected_ServiceProvider
+    static async getEventRequirementBidPrice(req, res) {
+        const { req_id, sp_id } = req.params;
+        try {
+            const results = await db.query(
+                'SELECT * FROM requirement_bidding WHERE requirement_id = $1 AND service_provider_id = $2',
+                [req_id, sp_id]
+            );
+            const requirement_bidding = results.rows[0];
+            res.status(200).json({
+                status: 'success',
+                data: requirement_bidding,
+            });
+        } catch (e) {
+            res.status(400);
+            throw new Error(e);
+        }
+    }
+
+    // @desc    CREATE event requirements bidding
+    // @route   POST /api/v1/requirements/:req_id/bids/:sp_id
     // @access  Protected_ServiceProvider
     static async createEventRequirementBidding(req, res) {
-        const { requirement_id, service_provider_id, price } = req.body;
-
+        const { req_id, sp_id } = req.params;
+        const { price } = req.body;
         try {
             const results = await db.query(
                 'INSERT INTO requirement_bidding (requirement_id, service_provider_id, price) VALUES ($1, $2, $3) RETURNING *',
-                [requirement_id, service_provider_id, price]
+                [req_id, sp_id, price]
             );
             const requirement_bidding = results.rows[0];
             res.status(200).json({
@@ -132,7 +167,7 @@ class RequirementController {
         }
     }
     // @desc    UPDATE event requirements bidding
-    // @route   PUT /api/v1/requirements/:id/bidding
+    // @route   PUT /api/v1/requirements/:req_id/bids/:sp_id
     // @access  Protected_ServiceProvider
     static async updateEventRequirementBidding(req, res) {
         const { price } = req.body;
@@ -154,13 +189,14 @@ class RequirementController {
     }
 
     // @desc    DELETE event requirements bidding
-    // @route   DELETE /api/v1/requirements/:id/bidding
+    // @route   DELETE /api/v1/requirements/:req_id/bids/:sp_id
     // @access  Protected_ServiceProvider
     static async deleteEventRequirementBidding(req, res) {
+        const { req_id, sp_id } = req.params;
         try {
             const results = await db.query(
-                'DELETE FROM requirement_bidding WHERE requirement_id = $1 RETURNING *',
-                [req.params.id]
+                'DELETE FROM requirement_bidding WHERE requirement_id = $1 AND service_provider_id=$2 RETURNING *',
+                [req_id, sp_id]
             );
             const deleted_requirement_bidding = results.rows[0];
             res.status(200).json({
