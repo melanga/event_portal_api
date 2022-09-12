@@ -1,6 +1,33 @@
 const db = require('../db');
 const _ = require('lodash');
 
+// @desc    GET service_provider details
+// @route   GET /api/v1/service_providers/:id
+// @access  Private
+const getServiceProvider = async (req, res) => {
+    try {
+        // join service_provider_event table with event table
+        const result = await db.query(
+            'SELECT * FROM service_provider sp JOIN users u ON sp.user_id = u.id WHERE sp.user_id = $1',
+            [req.params.id]
+        );
+        const events = _.omit(result.rows[0], [
+            'created_at',
+            'updated_at',
+            'password',
+            'id',
+        ]);
+
+        res.status(200).json({
+            status: 'success',
+            data: events,
+        });
+    } catch (e) {
+        res.status(400);
+        throw new Error(e);
+    }
+};
+
 // @desc    GET service_providers events
 // @route   GET /api/v1/service_providers/:id/events
 // @access  Protected
@@ -64,6 +91,7 @@ const getServiceProvidersBySearch = async (req, res) => {
         );
         const service_providers = result.rows.map((sp) =>
             _.pick(sp, [
+                'id',
                 'service_title',
                 'description',
                 'location',
@@ -99,6 +127,7 @@ const getServiceProvidersByFilter = async (req, res) => {
         );
         const service_providers = result.rows.map((sp) =>
             _.pick(sp, [
+                'id',
                 'service_title',
                 'description',
                 'location',
@@ -129,6 +158,7 @@ const getRecentServiceProviders = async (req, res) => {
         );
         const service_providers = results.rows.map((sp) =>
             _.pick(sp, [
+                'id',
                 'service_title',
                 'description',
                 'location',
@@ -186,4 +216,5 @@ module.exports = serviceProviderController = {
     getRecentServiceProviders,
     getServiceProvidersByFilter,
     getServiceProviderBids,
+    getServiceProvider,
 };
