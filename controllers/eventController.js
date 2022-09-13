@@ -162,7 +162,7 @@ class EventController {
     // @route   PUT /api/v1/events/:event_id/service_providers/:service_provider_id
     // @access  Protected
     static async putEventServiceProvider(req, res) {
-        const { event_id, service_provider_id } = req.body;
+        const { event_id, service_provider_id } = req.params;
         try {
             const results = await db.query(
                 'INSERT INTO service_provider_event (event_id, service_provider_id) VALUES ($1,$2) RETURNING *',
