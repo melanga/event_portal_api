@@ -42,5 +42,8 @@ router
         protect_service_provider,
         EventController.updateEventServiceProviderSPConfirmed
     );
+router
+    .route('/:event_id/service_providers/:service_provider_id/budget')
+    .put(protect_service_provider, EventController.setEventBudget);
 
 module.exports = router;

@@ -163,10 +163,11 @@ class EventController {
     // @access  Protected
     static async putEventServiceProvider(req, res) {
         const { event_id, service_provider_id } = req.params;
+        const { price } = req.body;
         try {
             const results = await db.query(
-                'INSERT INTO service_provider_event (event_id, service_provider_id) VALUES ($1,$2) RETURNING *',
-                [event_id, service_provider_id]
+                'INSERT INTO service_provider_event (event_id, service_provider_id, budget) VALUES ($1,$2, $3) RETURNING *',
+                [event_id, service_provider_id, price]
             );
             const added_service_provider = results.rows[0];
             res.status(200).json({
@@ -237,6 +238,25 @@ class EventController {
             res.status(200).json({
                 status: 'success',
                 data: updated_service_provider,
+            });
+        } catch (e) {
+            res.status(400);
+            throw new Error(e);
+        }
+    }
+
+    static async setEventBudget(req, res) {
+        const { budget } = req.body;
+        const { event_id, service_provider_id } = req.params;
+        try {
+            const results = await db.query(
+                'UPDATE service_provider_event SET budget=$1 WHERE service_provider_id=$2 AND event_id=$3  RETURNING *',
+                [budget, service_provider_id, event_id]
+            );
+            const updated_event = results.rows[0];
+            res.status(200).json({
+                status: 'success',
+                data: updated_event,
             });
         } catch (e) {
             res.status(400);
